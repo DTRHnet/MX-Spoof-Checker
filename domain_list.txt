@@ -1,0 +1,12 @@
+# dtrh_mail_poc default domain list
+# Lines starting with # are comments
+# Format: one domain per line (subdomains/protocols auto-sanitized)
+# Example: https://sub.example.com/path → example.com
+
+# add your domain here
+
+dtrh.net
+example.com
+test.org
+github.com
+google.com

@@ -1,0 +1,545 @@
+[
+  {
+    "domain": "github.com",
+    "score": 70,
+    "tier": "CRITICAL",
+    "reasons": [
+      "No SPF record or permissive (+all/none) \u2192 anyone can send as this domain",
+      "DMARC p=quarantine \u2192 suspicious mail quarantined",
+      "SPF includes outlook.com \u2192 commonly abused cloud sender",
+      "SPF includes google.com \u2192 commonly abused cloud sender",
+      "SPF includes sendgrid.net \u2192 commonly abused cloud sender"
+    ],
+    "delivery_spoofability": {
+      "deliverable": true,
+      "risk_level": "HIGH - Spoofed mail likely delivered",
+      "risk_score": 6,
+      "conditions": [
+        "\u26a0 DMARC p=quarantine \u2192 May go to spam folder, but often delivered",
+        "\u2717 SPF +all/none/missing \u2192 SPF check passes for anyone",
+        "\u2713 Domain has DKIM keys \u2192 Legitimate mail can sign (attacker cannot)",
+        "\u2713 MX records exist \u2192 Bounces route back (enables backscatter)"
+      ],
+      "explanation": "A spoofed message using this domain as envelope sender (MAIL FROM) would likely be ACCEPTED and DELIVERED by many receiving servers, just like the spam in the blog post that reached Sakura and only failed due to recipient quota. The recipient would see the forged From: address."
+    },
+    "mx": {
+      "has_mx": true,
+      "records": [
+        {
+          "priority": 0,
+          "exchange": "github-com.mail.protection.outlook.com"
+        }
+      ],
+      "error": null
+    },
+    "spf": {
+      "has_spf": true,
+      "record": "v=spf1 ip4:192.30.252.0/22 include:spf.protection.outlook.com include:_netblocks.google.com include:_netblocks2.google.com include:mail.zendesk.com include:_spf.salesforce.com include:servers.mcsv.net include:mktomail.com include:sendgrid.net ip4:62.253.2",
+      "all_mechanism": "none",
+      "includes": [
+        "spf.protection.outlook.com",
+        "_netblocks.google.com",
+        "_netblocks2.google.com",
+        "mail.zendesk.com",
+        "_spf.salesforce.com",
+        "servers.mcsv.net",
+        "mktomail.com",
+        "sendgrid.net"
+      ],
+      "error": null
+    },
+    "dmarc": {
+      "has_dmarc": true,
+      "record": "v=DMARC1; p=quarantine; sp=reject; pct=100; rua=mailto:dmarc@github.com; ruf=mailto:dmarc@github.com; fo=1",
+      "policy": "quarantine",
+      "subdomain_policy": "reject",
+      "rua": [
+        "mailto:dmarc@github.com"
+      ],
+      "error": null
+    },
+    "dkim": {
+      "has_dkim": true,
+      "selectors": {
+        "default": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "selector1": {
+          "found": true,
+          "record": "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCxZC/z2cK+2s1f/ktzSDSeFzkfIHrjwtGFsfKMAYvKaXjPVNzKykpbXBkX5nB7dVUTFttda7aROr2iSrIseQ27Ui+4rUZVzgFanE8RaXhYM9n5wPKNv8GtLJk7JgcsYZ7ErgID4uW2sEYyV/dnRYw6rDzOaeRKkKELTUfJI5ebLQIDAQAB;",
+          "key_type": "rsa",
+          "key_size": 1296,
+          "empty": false
+        },
+        "selector2": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "mail": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "k1": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "k2": {
+          "found": true,
+          "record": "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv2aC2KjGKLOwTweBY5A9RpjsxaBXR9r7OAU6U8/zn92ivImI75naUujWbItRI/QmL1jy5PWGqLwoUA0b90ObWaLDc+i9MtTNmGeWO009hr20fIxhGg6XBT2kjZ1DTThopSe1nAndsupmcBwlQ5Q6LJ+ZAxLcujnPIxM0ZBLmgpkv8u6RfY4eFP8OLvdAW3oSu",
+          "key_type": "rsa",
+          "key_size": 1422,
+          "empty": false
+        },
+        "dkim": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        }
+      },
+      "valid_keys": 2,
+      "error": null
+    },
+    "timestamp": "2026-10-27T20:19:18.255994Z"
+  },
+  {
+    "domain": "test.org",
+    "score": 60,
+    "tier": "HIGH",
+    "reasons": [
+      "SPF softfail (~all) \u2192 unauthorized senders accepted but marked",
+      "No DMARC record \u2192 receivers have no policy guidance",
+      "No valid DKIM keys \u2192 no cryptographic message signing"
+    ],
+    "delivery_spoofability": {
+      "deliverable": true,
+      "risk_level": "HIGH - Spoofed mail likely delivered",
+      "risk_score": 6,
+      "conditions": [
+        "\u26a0 DMARC p=none \u2192 No enforcement, delivery likely",
+        "\u26a0 SPF ~all (softfail) \u2192 Unauthorized senders accepted but marked",
+        "\u26a0 No DKIM keys \u2192 No signing possible for anyone (legitimate or attacker)",
+        "\u2713 MX records exist \u2192 Bounces route back (enables backscatter)"
+      ],
+      "explanation": "A spoofed message using this domain as envelope sender (MAIL FROM) would likely be ACCEPTED and DELIVERED by many receiving servers, just like the spam in the blog post that reached Sakura and only failed due to recipient quota. The recipient would see the forged From: address."
+    },
+    "mx": {
+      "has_mx": true,
+      "records": [
+        {
+          "priority": 10,
+          "exchange": "mailcow.test.org"
+        }
+      ],
+      "error": null
+    },
+    "spf": {
+      "has_spf": true,
+      "record": "v=spf1 mx include:spf.mailjet.com ~all",
+      "all_mechanism": "~all",
+      "includes": [
+        "spf.mailjet.com"
+      ],
+      "error": null
+    },
+    "dmarc": {
+      "has_dmarc": false,
+      "record": "",
+      "policy": "none",
+      "subdomain_policy": null,
+      "rua": [],
+      "error": "NXDOMAIN"
+    },
+    "dkim": {
+      "has_dkim": false,
+      "selectors": {
+        "default": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "selector1": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "selector2": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "mail": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "k1": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "k2": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "dkim": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        }
+      },
+      "valid_keys": 0,
+      "error": null
+    },
+    "timestamp": "2026-10-27T20:19:20.143630Z"
+  },
+  {
+    "domain": "google.com",
+    "score": 40,
+    "tier": "HIGH",
+    "reasons": [
+      "SPF softfail (~all) \u2192 unauthorized senders accepted but marked",
+      "No valid DKIM keys \u2192 no cryptographic message signing",
+      "SPF includes google.com \u2192 commonly abused cloud sender"
+    ],
+    "delivery_spoofability": {
+      "deliverable": true,
+      "risk_level": "MEDIUM - Spoofed mail may be delivered (spam folder or inbox)",
+      "risk_score": 4,
+      "conditions": [
+        "\u2717 DMARC p=reject \u2192 Receiving servers SHOULD reject on alignment failure",
+        "\u26a0 SPF ~all (softfail) \u2192 Unauthorized senders accepted but marked",
+        "\u26a0 No DKIM keys \u2192 No signing possible for anyone (legitimate or attacker)",
+        "\u2713 MX records exist \u2192 Bounces route back (enables backscatter)"
+      ],
+      "explanation": "A spoofed message using this domain as envelope sender (MAIL FROM) would likely be ACCEPTED and DELIVERED by many receiving servers, just like the spam in the blog post that reached Sakura and only failed due to recipient quota. The recipient would see the forged From: address."
+    },
+    "mx": {
+      "has_mx": true,
+      "records": [
+        {
+          "priority": 10,
+          "exchange": "smtp.google.com"
+        }
+      ],
+      "error": null
+    },
+    "spf": {
+      "has_spf": true,
+      "record": "v=spf1 include:_spf.google.com ~all",
+      "all_mechanism": "~all",
+      "includes": [
+        "_spf.google.com"
+      ],
+      "error": null
+    },
+    "dmarc": {
+      "has_dmarc": true,
+      "record": "v=DMARC1; p=reject; rua=mailto:mailauth-reports@google.com",
+      "policy": "reject",
+      "subdomain_policy": null,
+      "rua": [
+        "mailto:mailauth-reports@google.com"
+      ],
+      "error": null
+    },
+    "dkim": {
+      "has_dkim": false,
+      "selectors": {
+        "default": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "selector1": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "selector2": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "mail": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "k1": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "k2": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        },
+        "dkim": {
+          "found": false,
+          "record": "",
+          "key_type": "",
+          "key_size": 0,
+          "empty": false
+        }
+      },
+      "valid_keys": 0,
+      "error": null
+    },
+    "timestamp": "2026-10-27T20:19:18.307878Z"
+  },
+  {
+    "domain": "example.com",
+    "score": 15,
+    "tier": "LOW",
+    "reasons": [
+      "No valid DKIM keys \u2192 no cryptographic message signing"
+    ],
+    "delivery_spoofability": {
+      "deliverable": false,
+      "risk_level": "LOW - Some risk if receiver doesn't enforce DMARC",
+      "risk_score": 1,
+      "conditions": [
+        "\u2717 DMARC p=reject \u2192 Receiving servers SHOULD reject on alignment failure",
+        "\u2713 SPF -all (hardfail) \u2192 SPF check fails for unauthorized senders",
+        "\u26a0 No DKIM keys \u2192 No signing possible for anyone (legitimate or attacker)",
+        "\u2713 MX records exist \u2192 Bounces route back (enables backscatter)"
+      ],
+      "explanation": "Strong protections (DMARC p=reject + SPF -all) mean most compliant receivers will REJECT spoofed messages at SMTP time. However, non-compliant receivers may still deliver."
+    },
+    "mx": {
+      "has_mx": true,
+      "records": [
+        {
+          "priority": 0,
+          "exchange": ""
+        }
+      ],
+      "error": null
+    },
+    "spf": {
+      "has_spf": true,
+      "record": "v=spf1 -all",
+      "all_mechanism": "-all",
+      "includes": [],
+      "error": null
+    },
+    "dmarc": {
+      "has_dmarc": true,
+      "record": "v=DMARC1;p=reject;sp=reject;adkim=s;aspf=s",
+      "policy": "reject",
+      "subdomain_policy": "reject",
+      "rua": [],
+      "error": null
+    },
+    "dkim": {
+      "has_dkim": false,
+      "selectors": {
+        "default": {
+          "found": true,
+          "record": "v=DKIM1; p=",
+          "key_type": "",
+          "key_size": 0,
+          "empty": true
+        },
+        "selector1": {
+          "found": true,
+          "record": "v=DKIM1; p=",
+          "key_type": "",
+          "key_size": 0,
+          "empty": true
+        },
+        "selector2": {
+          "found": true,
+          "record": "v=DKIM1; p=",
+          "key_type": "",
+          "key_size": 0,
+          "empty": true
+        },
+        "mail": {
+          "found": true,
+          "record": "v=DKIM1; p=",
+          "key_type": "",
+          "key_size": 0,
+          "empty": true
+        },
+        "k1": {
+          "found": true,
+          "record": "v=DKIM1; p=",
+          "key_type": "",
+          "key_size": 0,
+          "empty": true
+        },
+        "k2": {
+          "found": true,
+          "record": "v=DKIM1; p=",
+          "key_type": "",
+          "key_size": 0,
+          "empty": true
+        },
+        "dkim": {
+          "found": true,
+          "record": "v=DKIM1; p=",
+          "key_type": "",
+          "key_size": 0,
+          "empty": true
+        }
+      },
+      "valid_keys": 0,
+      "error": null
+    },
+    "timestamp": "2026-10-27T20:19:18.228245Z"
+  },
+  {
+    "domain": "dtrh.net",
+    "score": 0,
+    "tier": "LOW",
+    "reasons": [
+      "Empty DKIM selectors (selector1, selector2, mail, k1, k2, dkim) create confusion"
+    ],
+    "delivery_spoofability": {
+      "deliverable": false,
+      "risk_level": "LOW - Some risk if receiver doesn't enforce DMARC",
+      "risk_score": 1,
+      "conditions": [
+        "\u2717 DMARC p=reject \u2192 Receiving servers SHOULD reject on alignment failure",
+        "\u2713 SPF -all (hardfail) \u2192 SPF check fails for unauthorized senders",
+        "\u2713 Domain has DKIM keys \u2192 Legitimate mail can sign (attacker cannot)",
+        "\u2713 MX records exist \u2192 Bounces route back (enables backscatter)"
+      ],
+      "explanation": "Strong protections (DMARC p=reject + SPF -all) mean most compliant receivers will REJECT spoofed messages at SMTP time. However, non-compliant receivers may still deliver."
+    },
+    "mx": {
+      "has_mx": true,
+      "records": [
+        {
+          "priority": 10,
+          "exchange": "mx1.improvmx.com"
+        },
+        {
+          "priority": 20,
+          "exchange": "mx2.improvmx.com"
+        }
+      ],
+      "error": null
+    },
+    "spf": {
+      "has_spf": true,
+      "record": "v=spf1 include:spf.improvmx.com -all",
+      "all_mechanism": "-all",
+      "includes": [
+        "spf.improvmx.com"
+      ],
+      "error": null
+    },
+    "dmarc": {
+      "has_dmarc": true,
+      "record": "v=DMARC1; p=reject; rua=mailto:dmarc@dtrh.net",
+      "policy": "reject",
+      "subdomain_policy": null,
+      "rua": [
+        "mailto:dmarc@dtrh.net"
+      ],
+      "error": null
+    },
+    "dkim": {
+      "has_dkim": true,
+      "selectors": {
+        "default": {
+          "found": true,
+          "record": "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0LGQ8dwuHeORUqCGaAdJji2xxH4CUTqLJSxl+r0wwXcpSmykcR/kakPhmLmhmWM0vsF11TCMtA5slPUn+4RaL9V8VifBWssRy3i/v+sRh89/GeHNW2fvZMwMK2odaFLDLh04xs7i1/7XOnuxAkoNlV55k0ZbL/gk4wTxCez635xXUvEt5Jnl8tZT5NVwG2uw8",
+          "key_type": "rsa",
+          "key_size": 1422,
+          "empty": false
+        },
+        "selector1": {
+          "found": true,
+          "record": "v=DKIM1; p=",
+          "key_type": "",
+          "key_size": 0,
+          "empty": true
+        },
+        "selector2": {
+          "found": true,
+          "record": "v=DKIM1; p=",
+          "key_type": "",
+          "key_size": 0,
+          "empty": true
+        },
+        "mail": {
+          "found": true,
+          "record": "v=DKIM1; p=",
+          "key_type": "",
+          "key_size": 0,
+          "empty": true
+        },
+        "k1": {
+          "found": true,
+          "record": "v=DKIM1; p=",
+          "key_type": "",
+          "key_size": 0,
+          "empty": true
+        },
+        "k2": {
+          "found": true,
+          "record": "v=DKIM1; p=",
+          "key_type": "",
+          "key_size": 0,
+          "empty": true
+        },
+        "dkim": {
+          "found": true,
+          "record": "v=DKIM1; p=",
+          "key_type": "",
+          "key_size": 0,
+          "empty": true
+        }
+      },
+      "valid_keys": 1,
+      "error": null
+    },
+    "timestamp": "2026-10-27T20:19:18.298180Z"
+  }
+]
