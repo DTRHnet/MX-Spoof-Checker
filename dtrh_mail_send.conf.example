@@ -1,0 +1,9 @@
+# dtrh_mail_send configuration
+# Copy this file to dtrh_mail_send.conf and edit with your SMTP credentials
+
+SMTP_HOST = "smtp.example.com"
+SMTP_PORT = 587
+SMTP_USER = "your@email.com"
+SMTP_PASS = "your-password"
+TARGET_EMAIL = "target@example.com"
+USE_TLS = true
