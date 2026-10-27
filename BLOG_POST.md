@@ -199,10 +199,10 @@ What I *have*: A bounce addressed to a forged envelope sender at my domain, forw
 
 ```mermaid
 flowchart TD
-    A[Spammer] -->|MAIL FROM: ikmfgvivz@dtrh.net<br/>FROM: ikmfgvivz@dtrh.net<br/><b>FORGED</b>| B[Sakura Internet<br/>www478.sakura.ne.jp]
-    B -->|Accepts for 18@bar18.jp| C[Local Handoff<br/>localhost (127.0.0.1)]
-    C -->|Delivery Fails| D[maildir over quota<br/>550 5.0.0 Insufficient permission]
-    D -->|Generates DSN to<br/>envelope sender| E[Bounce to ikmfgvivz@dtrh.net]
+    A[Spammer] -->|MAIL FROM: ikmfgvivz@dtrh.net\nFROM: ikmfgvivz@dtrh.net\nFORGED| B[Sakura Internet\nwww478.sakura.ne.jp]
+    B -->|Accepts for 18@bar18.jp| C[Local Handoff\nlocalhost (127.0.0.1)]
+    C -->|Delivery Fails| D[maildir over quota\n550 5.0.0 Insufficient permission]
+    D -->|Generates DSN to\nenvelope sender| E[Bounce to ikmfgvivz@dtrh.net]
 ```
 
 *Figure 1: The spam path — forged envelope sender accepted by Sakura, fails local delivery due to quota*
@@ -215,10 +215,10 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    E[Bounce from Sakura<br/>www478.sakura.ne.jp] -->|RCPT TO: ikmfgvivz@dtrh.net| F[mx1.improvmx.com<br/>ImprovMX Primary MX]
-    F -->|2.0.0 Queued for forwarding| G[mail2.mxpn1.infra.improvmx.com<br/>ImprovMX Outbound]
-    G -->|SMTP| H[gmail-smtp-in.l.google.com<br/>Gmail Inbound]
-    H -->|2.0.0 OK<br/>Message ID: 1793078728...| I[My Gmail Inbox<br/>dtrhnet@gmail.com]
+    E[Bounce from Sakura\nwww478.sakura.ne.jp] -->|RCPT TO: ikmfgvivz@dtrh.net| F[mx1.improvmx.com\nImprovMX Primary MX]
+    F -->|2.0.0 Queued for forwarding| G[mail2.mxpn1.infra.improvmx.com\nImprovMX Outbound]
+    G -->|SMTP| H[gmail-smtp-in.l.google.com\nGmail Inbound]
+    H -->|2.0.0 OK\nMessage ID: 1793078728...| I[My Gmail Inbox\ndtrhnet@gmail.com]
 ```
 
 *Figure 2: The bounce path — DSN routed back through ImprovMX forwarding to Gmail*
@@ -465,20 +465,20 @@ The scanner I wrote (`dtrh_mail_poc.py`) is already a complete domain analyzer. 
 
 ```mermaid
 flowchart TD
-    A[Input: Domain List<br/>1M+ domains] --> B[Parallel DNS Resolution<br/>massdns / dnsx]
+    A[Input: Domain List\n1M+ domains] --> B[Parallel DNS Resolution\nmassdns / dnsx]
     B --> C1[MX Records]
-    B --> C2[TXT Records<br/>SPF, DMARC]
-    B --> C3[DKIM Selectors<br/>Common + Permutation]
+    B --> C2[TXT Records\nSPF, DMARC]
+    B --> C3[DKIM Selectors\nCommon + Permutation]
     C1 --> D[Parse & Normalize]
     C2 --> D
     C3 --> D
-    D --> E1[SPF Analysis<br/>mechanisms, all-value, includes]
-    D --> E2[DMARC Analysis<br/>policy, subdomain, reporting]
-    D --> E3[DKIM Analysis<br/>key presence, size, algorithm]
-    E1 --> F[Scoring Engine<br/>Rule-based + ML]
+    D --> E1[SPF Analysis\nmechanisms, all-value, includes]
+    D --> E2[DMARC Analysis\npolicy, subdomain, reporting]
+    D --> E3[DKIM Analysis\nkey presence, size, algorithm]
+    E1 --> F[Scoring Engine\nRule-based + ML]
     E2 --> F
     E3 --> F
-    F --> G[Output: Ranked List<br/>Evidence + Remediation]
+    F --> G[Output: Ranked List\nEvidence + Remediation]
 ```
 
 *Figure 3: Automated reconnaissance pipeline for domain spoofability assessment*
