@@ -1,14 +1,13 @@
----
-date: 2026-10-27
-status: Complete - DNS fixes applied, verified, and documented
-title: "Your Domain Is Sending Spam (Spoiler: It's Not You)"
----
-
 # Your Domain Is Sending Spam (Spoiler: It's Not You)
 
-## How a bounce exposed my SPF/DMARC gap — and how I fixed it in 3 Cloudflare commands
+> **How a bounce exposed my SPF/DMARC gap — and how I fixed it in 3 Cloudflare commands**
 
-> **Note:** This is my personal case study. I'm the owner of `dtrh.net`. What follows is a real investigation triggered by a suspicious bounce that landed in my inbox. I'm writing this as a technical narrative—direct, sometimes casual, but precise where it matters. If you run a domain with email forwarding, this might save you some sleepless nights.
+---
+
+**Published:** 2026-10-27  
+**Author:** kbs <admin@dtrh.net>  
+**Domain:** dtrh.net  
+**Tools:** [MX-Spoof-Checker](https://github.com/DTRHnet/MX-Spoof-Checker) — `dtrh_mail_poc.py` (scanner) + `dtrh_mail_send.py` (demo spoofer)
 
 ---
 
@@ -196,6 +195,8 @@ What I *have*: A bounce addressed to a forged envelope sender at my domain, forw
 
 ### Original Spam Message Path
 
+<div align="center">
+
 ```mermaid
 flowchart TD
     A[Spammer] -->|MAIL FROM: ikmfgvivz@dtrh.net<br/>FROM: ikmfgvivz@dtrh.net<br/><b>FORGED</b>| B[Sakura Internet<br/>www478.sakura.ne.jp]
@@ -204,7 +205,13 @@ flowchart TD
     D -->|Generates DSN to<br/>envelope sender| E[Bounce to ikmfgvivz@dtrh.net]
 ```
 
+*Figure 1: The spam path — forged envelope sender accepted by Sakura, fails local delivery due to quota*
+
+</div>
+
 ### Bounce Delivery Path
+
+<div align="center">
 
 ```mermaid
 flowchart TD
@@ -213,6 +220,10 @@ flowchart TD
     G -->|SMTP| H[gmail-smtp-in.l.google.com<br/>Gmail Inbound]
     H -->|2.0.0 OK<br/>Message ID: 1793078728...| I[My Gmail Inbox<br/>dtrhnet@gmail.com]
 ```
+
+*Figure 2: The bounce path — DSN routed back through ImprovMX forwarding to Gmail*
+
+</div>
 
 ---
 
@@ -289,6 +300,7 @@ cf dns records create -z dtrh.net \
 ```
 
 **Result:**
+
 ```json
 {
   "name": "_dmarc.dtrh.net",
@@ -308,6 +320,7 @@ cf dns records edit 3ff39b1fc8fb3932d1a66e56d8034c3a -z dtrh.net \
 ```
 
 **Result:**
+
 ```json
 {
   "name": "dtrh.net",
@@ -384,6 +397,7 @@ python dtrh_mail_poc.py dtrh.net github.com google.com -v
 ```
 
 Output:
+
 ```
 🟢 dtrh.net        Score:   0  Tier: LOW       🛡️ Deliverable: False  Risk: LOW
 🔴 github.com      Score:  70  Tier: CRITICAL  🚨 Deliverable: True   Risk: HIGH
@@ -439,16 +453,15 @@ SPOOFABILITY SCORE = f(
 
 **High score = easy to spoof `From:` and have it pass/deliver.**
 
-### Can AI Do This?
+---
 
-**Yes, absolutely.** The tools exist:
+## Automating the Hunt: How the Checker Becomes a Weapon
 
-- `dig`, `dnsx`, `massdns` for bulk DNS resolution
-- SPF/DMARC parsers (libraries in Go, Python, Rust)
-- DKIM selector enumeration (common selectors + brute force)
-- Public blocklists / reputation APIs
+The scanner I wrote (`dtrh_mail_poc.py`) is already a complete domain analyzer. Here's how it — or a derivative — could be scaled to find abusable domains at internet scale:
 
-**A pipeline could look like:**
+### The Reconnaissance Pipeline
+
+<div align="center">
 
 ```mermaid
 flowchart TD
@@ -468,7 +481,96 @@ flowchart TD
     F --> G[Output: Ranked List<br/>Evidence + Remediation]
 ```
 
-**This isn't theoretical.** Security researchers and threat intel firms do variations of this. The hard part isn't the DNS queries—it's the *interpretation*: distinguishing "legitimately permissive" from "misconfigured," handling subdomain delegation, dealing with parked domains, etc.
+*Figure 3: Automated reconnaissance pipeline for domain spoofability assessment*
+
+</div>
+
+### Implementation at Scale
+
+**1. Input Acquisition**
+```bash
+# Sources for domain lists:
+- Tranco top 1M / Cisco Umbrella 1M
+- Certificate Transparency logs (new certs = new domains)
+- Zone file downloads (.com, .net, .org via ICANN)
+- Passive DNS (Farsight, SecurityTrails, VirusTotal)
+- Subdomain enumeration (crt.sh, subfinder, amass)
+```
+
+**2. Mass DNS Resolution**
+```python
+# Using dnspython with async or massdns CLI
+import asyncio
+import dns.asyncresolver
+
+async def bulk_check(domains, concurrency=500):
+    sem = asyncio.Semaphore(concurrency)
+    async def check_one(domain):
+        async with sem:
+            return await analyze_domain(domain)
+    return await asyncio.gather(*[check_one(d) for d in domains])
+```
+
+**3. SPF Parsing & Expansion**
+```python
+# Recursively expand includes, collect all netblocks
+# Flag: redirect=, +all, ~all, missing all, excessive includes
+# Cross-reference against known cloud provider netblocks
+```
+
+**4. DKIM Enumeration**
+```python
+# Common selectors: default, selector1, selector2, mail, k1, k2, dkim, google, amazonses, etc.
+# Brute-force: 2-4 char prefixes + common words
+# Validate key size (reject <1024-bit), algorithm (rsa-sha256 preferred)
+```
+
+**5. Scoring & Ranking**
+```python
+def score_domain(result):
+    score = 0
+    # SPF
+    if not result.spf.exists or result.spf.all in ('+all', 'none'): score += 30
+    elif result.spf.all == '~all': score += 15
+    elif result.spf.all == '?all': score += 20
+    # DMARC
+    if not result.dmarc.exists: score += 30
+    elif result.dmarc.policy == 'none': score += 20
+    elif result.dmarc.policy == 'quarantine': score += 10
+    # DKIM
+    if result.dkim.valid_keys == 0: score += 15
+    # Cloud providers in SPF
+    for inc in result.spf.includes:
+        if any(p in inc for p in CLOUD_PROVIDERS): score += 10
+    return min(score, 100)
+```
+
+**6. Output & Prioritization**
+```json
+{
+  "domain": "example.com",
+  "score": 85,
+  "tier": "CRITICAL",
+  "deliverable": true,
+  "evidence": {
+    "spf": "v=spf1 include:_spf.google.com ~all",
+    "dmarc": "missing",
+    "dkim": "no valid keys",
+    "cloud_providers": ["google.com"]
+  },
+  "recommendation": "Trivially spoofable — no DMARC, softfail SPF, Google in SPF"
+}
+```
+
+### Operational Considerations for the Attacker
+
+| Challenge | Solution |
+|-----------|----------|
+| **Rate limiting** | Distribute across residential proxies, rotate resolvers |
+| **False positives** | Validate with test sends (low volume, controlled) |
+| **Subdomain delegation** | Recurse into `_dmarc.sub.domain`, check `v=spf1 redirect=` |
+| **Parked/expired domains** | Filter via HTTP status, WHOIS, NS records |
+| **Volume** | 1M domains ≈ 4-6 hours on modest hardware (500 concurrent) |
 
 ### Defensive Automation (What I'd Build)
 
@@ -530,11 +632,11 @@ List everything that sends as `@yourdomain`:
 If **zero** outbound senders → you can go straight to `p=reject`. If **any** → note each one.
 
 ### 3. Fix SPF (5 minutes)
-**If zero senders:** `v=spf1 include:spf.yourforwarder.com -all`
+**If zero senders:** `v=spf1 include:spf.yourforwarder.com -all`  
 **If senders exist:** Add each sender's `include:` or `ip4:` before the `-all`. Test with the scanner.
 
 ### 4. Add DMARC (5 minutes)
-**If zero senders:** `v=DMARC1; p=reject; rua=mailto:dmarc@yourdomain.com`
+**If zero senders:** `v=DMARC1; p=reject; rua=mailto:dmarc@yourdomain.com`  
 **If senders exist:** Start with `p=none` + `rua`. Watch reports for 2 weeks. Then `p=quarantine`, then `p=reject`.
 
 ### 5. Verify DKIM (5 minutes)
@@ -553,6 +655,18 @@ The `rua=` address gets XML reports daily/weekly. Parse them (the scanner can he
 
 ---
 
-*Published: 2026-10-27 | Domain: dtrh.net | Author: Domain Owner*
+## Closing Thoughts
+
+This whole investigation started with a single bounce in my spam folder. A counterfeit-accessories spam, a Japanese recipient, a quota error—and my domain in the `MAIL FROM`.
+
+The fix wasn't complicated. Three Cloudflare commands. Thirty minutes total. But it changed the answer to "can someone spoof my domain and have it delivered?" from **yes** to **no**.
+
+That's the point: **email authentication isn't about perfection—it's about raising the cost of abuse**. A domain with `p=reject` + `-all` SPF forces the attacker to compromise a legitimate sender or find a receiver that doesn't enforce DMARC. Most won't bother.
+
+If you run a domain—especially a forwarding-only one—run the scanner. Takes 30 seconds. Might save you from being the return address for someone else's spam.
+
+---
+
+*Published: 2026-10-27 | Domain: dtrh.net | Author: kbs <admin@dtrh.net>*
 
 **Tools:** [MX-Spoof-Checker](https://github.com/DTRHnet/MX-Spoof-Checker) — `dtrh_mail_poc.py` (scanner) + `dtrh_mail_send.py` (demo spoofer)
