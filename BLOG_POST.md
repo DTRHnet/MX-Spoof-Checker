@@ -200,7 +200,7 @@ What I *have*: A bounce addressed to a forged envelope sender at my domain, forw
 ```mermaid
 flowchart TD
     A[Spammer] -->|MAIL FROM: ikmfgvivz@dtrh.net<br/>FROM: ikmfgvivz@dtrh.net<br/><b>FORGED</b>| B[Sakura Internet<br/>www478.sakura.ne.jp]
-    B -->|Accepts for 18@bar18.jp| C[Local Handoff<br/>localhost [127.0.0.1]]
+    B -->|Accepts for 18@bar18.jp| C[Local Handoff<br/>localhost (127.0.0.1)]
     C -->|Delivery Fails| D[maildir over quota<br/>550 5.0.0 Insufficient permission]
     D -->|Generates DSN to<br/>envelope sender| E[Bounce to ikmfgvivz@dtrh.net]
 ```
