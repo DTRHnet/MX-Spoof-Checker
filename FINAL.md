@@ -12,6 +12,10 @@
 
 ---
 
+You know that feeling when a bounce lands in your inbox — *from your own domain* — and your stomach drops. `ikmfgvivz@dtrh.net`. An address that doesn't exist. Counterfeit accessories. A Japanese recipient. A quota error. That's not your mail. But it's wearing your return address.
+
+---
+
 ## 🔧 Tools & Repository
 
 All code from this investigation is available at:
