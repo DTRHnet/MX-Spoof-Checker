@@ -7,7 +7,8 @@
 **Published:** 2026-10-27  
 **Author:** kbs <admin@dtrh.net>  
 **Domain:** dtrh.net  
-**Tools:** [MX-Spoof-Checker](https://github.com/DTRHnet/MX-Spoof-Checker) — `dtrh_mail_poc.py` (scanner) + `dtrh_mail_send.py` (demo spoofer)
+**Tools:** [MX-Spoof-Checker](https://github.com/DTRHnet/MX-Spoof-Checker)  
+**Summary:** A suspicious bounce revealed my forwarding-only domain had no DMARC and softfail SPF — making it trivially spoofable. Three Cloudflare commands later (DMARC `p=reject`, SPF `-all`, DKIM cleanup), the domain went from "spoofable" to "reject at SMTP time." Includes a scanner (`dtrh_mail_poc.py`) that checks any domain's spoofability and a demo spoofer (`dtrh_mail_send.py`), plus a full breakdown of how to automate domain recon at scale.
 
 ---
 
